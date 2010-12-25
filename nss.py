@@ -22,13 +22,13 @@ _hash_mapping = {
 
 class Hash:
 
-    @staticmethod
-    def new(name):
+    @classmethod
+    def new(cls, name):
         name = name.upper()
         if name not in _hash_mapping:
             raise ValueError('unsupported hash type')
         context = nss.HASH_Create(_hash_mapping[name])
-        return Hash(context)
+        return cls(context)
 
     def __init__(self, context):
         self.context = context

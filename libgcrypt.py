@@ -14,14 +14,14 @@ libgcrypt.gcry_md_write
 
 class Hash:
 
-    @staticmethod
-    def new(name):
+    @classmethod
+    def new(cls, name):
         algorithm = libgcrypt.gcry_md_map_name(name)
         if not algorithm:
             raise ValueError('unsupported hash type')
         context = c_void_p()
         libgcrypt.gcry_md_open(byref(context), algorithm, 0)
-        return Hash(context)
+        return cls(context)
 
     def __init__(self, context):
         self.context = context
