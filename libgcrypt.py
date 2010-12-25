@@ -50,3 +50,47 @@ class Hash:
 
     def hexdigest(self):
         return self.digest().encode('hex')
+
+libgcrypt.gcry_cipher_close
+libgcrypt.gcry_cipher_decrypt
+libgcrypt.gcry_cipher_encrypt
+libgcrypt.gcry_cipher_map_name
+libgcrypt.gcry_cipher_open
+libgcrypt.gcry_cipher_setiv
+libgcrypt.gcry_cipher_setkey
+
+MODE_ECB = 1
+MODE_CBC = 3
+MODE_CFB = 2
+MODE_OFB = 5
+MODE_CTR = 6
+
+class Cipher:
+
+    def __init__(self, context):
+        self.context = context
+
+    def __del__(self):
+        libgcrypt.gcry_cipher_close(self.context)
+
+    def encrypt(self, string):
+        size = len(string)
+        buffer = create_string_buffer(size)
+        libgcrypt.gcry_cipher_encrypt(self.context, buffer, size, string, size)
+        return buffer.raw
+
+    def decrypt(self, string):
+        size = len(string)
+        buffer = create_string_buffer(size)
+        libgcrypt.gcry_cipher_encrypt(self.context, buffer, size, string, size)
+        return buffer.raw
+
+def make_new(name):
+    algorithm = libgcrypt.gcry_cipher_map_name(name)
+    def new(key, mode, iv):
+        context = c_void_p()
+        libgcrypt.gcry_cipher_open(byref(context), algorithm, mode, 0)
+        libgcrypt.gcry_cipher_setkey(context, key, len(key))
+        libgcrypt.gcry_cipher_setiv(context, iv, len(iv))
+        return Cipher(context)
+    return new
